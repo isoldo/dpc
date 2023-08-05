@@ -23,7 +23,7 @@ CREATE TABLE "Delivery" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "distance" INTEGER NOT NULL,
-    "cost" DECIMAL(65,30) NOT NULL,
+    "cost" DECIMAL(10,2) NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
     "phone" TEXT NOT NULL,
 
@@ -34,17 +34,17 @@ CREATE TABLE "Delivery" (
 CREATE TABLE "FixedPrices" (
     "id" SERIAL NOT NULL,
     "active" BOOLEAN NOT NULL,
-    "base" DECIMAL(65,30) NOT NULL,
-    "additionalPackage" DECIMAL(65,30) NOT NULL,
+    "base" DECIMAL(10,2) NOT NULL,
+    "additionalPackage" DECIMAL(10,2) NOT NULL,
 
     CONSTRAINT "FixedPrices_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
 CREATE TABLE "VariablePrices" (
-    "start" DECIMAL(65,30) NOT NULL,
-    "end" DECIMAL(65,30) NOT NULL,
-    "cost" DECIMAL(65,30) NOT NULL
+    "start" DECIMAL(10,2) NOT NULL,
+    "end" DECIMAL(10,2) NOT NULL,
+    "cost" DECIMAL(10,2) NOT NULL
 );
 
 -- CreateIndex
