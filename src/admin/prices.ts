@@ -103,7 +103,6 @@ async function updateFixedCosts(params: FixedPrices) {
   return result;
 }
 
-
 async function handlePutVariablePrices(req: express.Request, res: express.Response) {
   const data: VariablePrices[] = req.body;
 
@@ -115,11 +114,7 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
 
   try {
     for (const vp of data) {
-      console.debug({ vp });
       const paramCheck = !isNaN(vp.start) && !isNaN(vp.end) && !isNaN(vp.cost);
-      console.debug({ start: vp.start });
-      console.debug({ end: vp.end });
-      console.debug({ cost: vp.cost });
 
       if (!paramCheck) {
         return res.status(400).json({ error: { code: 400, message: "Invalid params" } });
@@ -130,10 +125,20 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
     return res.status(500).json({ error: { code: 500, message: "Internal server error" } });
   }
 
+  const sortedData = [...data].sort((a, b) => a.start - b.start);
+
+  if (!isExhaustive(sortedData)) {
+    return res.status(400).json({ error: { code: 400, message: "Input not exhaustive" } });
+  }
+
+  if (!isContiguous(sortedData)) {
+    return res.status(400).json({ error: { code: 400, message: "Input not contiguous" } });
+  }
+
   const result = await prisma.$transaction( async (pc) => {
     await pc.variablePrices.deleteMany();
     return await pc.variablePrices.createMany( {
-      data
+      data: sortedData
     })
   });
 
@@ -142,4 +147,23 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
   }
 
   return res.status(500).json({ code: 500, message: "Error updating variable prices"})
+}
+
+function isContiguous(sortedData: VariablePrices[]): boolean {
+  console.debug({ sortedData });
+
+  let end = sortedData[0].end;
+
+  for (let i = 1; i < sortedData.length; i++) {
+    if ( end !== sortedData[i].start) {
+      return false;
+    }
+    end = sortedData[i].end;
+  }
+
+  return true;
+}
+
+function isExhaustive(sortedData: VariablePrices[]): boolean {
+  return !(sortedData[0].start !== 0.0 || sortedData[sortedData.length-1].end !== -1.0);
 }
