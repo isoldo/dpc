@@ -65,8 +65,12 @@ async function handlePutFixedPrices(req: express.Request, res: express.Response)
   const params: FixedPrices = req.body;
     console.debug({params});
 
-    if (!params.base || !params.additionalPackage) {
+    if (isNaN(params.base) || isNaN(params.additionalPackage)) {
       return res.status(400).json({ error: { code: 400, message: "Incomplete body" } });
+    }
+
+    if (params.base < 0 || params.additionalPackage < 0) {
+      return res.status(400).json({ error: { code: 400, message: "Prices must not be negative"}});
     }
 
     const result = await updateFixedCosts(params);
