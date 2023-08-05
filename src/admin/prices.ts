@@ -123,7 +123,7 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
     }
   } catch (e) {
     console.error(`>>>>>> ERROR: ${(e as Error).message}`);
-    return res.status(400).json({ error: { code: 400, message: "Invalid params" } });
+    return res.status(500).json({ error: { code: 500, message: "Internal server error" } });
   }
 
   const result = await prisma.$transaction( async (pc) => {
