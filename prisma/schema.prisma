@@ -30,7 +30,7 @@ model Delivery {
   id        String @id @unique @default(uuid())
   userId    String
   distance  Int
-  cost      Decimal @db.Decimal(10,2)
+  cost      Float
   date      DateTime
 
   user      User   @relation(fields: [userId], references: [id])
@@ -39,16 +39,16 @@ model Delivery {
 model FixedPrices {
   id                Int @id @default(autoincrement())
   active            Boolean
-  base              Decimal @db.Decimal(10,2)
-  additionalPackage Decimal @db.Decimal(10,2)
+  base              Float
+  additionalPackage Float
 
   @@index(type: Hash, fields: [active])
 }
 
 model VariablePrices {
-  start Decimal @db.Decimal(10,2)
-  end   Decimal @db.Decimal(10,2)
-  cost  Decimal @db.Decimal(10,2)
+  start Float
+  end   Float
+  cost  Float
 
   @@unique([start, end], name: "VariablePriceId")
 }
