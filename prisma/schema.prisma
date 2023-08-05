@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String @id @unique @default(uuid())
+  passwordHash String
+  email        String
+}
+
+model User {
+  id            String      @id @unique @default(uuid())
+  email         String      @unique
+  name          String
+  lastName      String
+  deliveryCount Int         @default(0)
+  Delivery      Delivery[]
+}
+
+model Delivery {
+  id        String @id @unique @default(uuid())
+  userId    String
+  distance  Int
+  cost      Decimal
+  date      DateTime
+  phone     String
+
+  user      User   @relation(fields: [userId], references: [id])
+}
+
+model FixedPrices {
+  id                Int @id @default(autoincrement())
+  active            Boolean
+  base              Decimal
+  additionalPackage Decimal
+
+  @@index(type: Hash, fields: [active])
+}
+
+model VariablePrices {
+  start Decimal
+  end   Decimal
+  cost  Decimal
+
+  @@unique([start, end], name: "VariablePriceId")
+}
