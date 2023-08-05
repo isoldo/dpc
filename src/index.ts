@@ -1,8 +1,9 @@
 import express from "express";
+import 'dotenv/config';
 
 const app = express();
-const port = 3000;
-const appName = "(isoldo) Delivery Price Calculator";
+const port = process.env.PORT || 3000;
+const appName = process.env.APP_NAME || "Default delivery price calculator app name";
 
 app.get('/api/health', (_req, res) => {
   res.status(200).send('ALIVE');
