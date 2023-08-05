@@ -13,6 +13,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
     "deliveryCount" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
@@ -25,7 +26,6 @@ CREATE TABLE "Delivery" (
     "distance" INTEGER NOT NULL,
     "cost" DECIMAL(10,2) NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
-    "phone" TEXT NOT NULL,
 
     CONSTRAINT "Delivery_pkey" PRIMARY KEY ("id")
 );

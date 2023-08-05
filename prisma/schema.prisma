@@ -21,6 +21,7 @@ model User {
   email         String      @unique
   name          String
   lastName      String
+  phone         String
   deliveryCount Int         @default(0)
   Delivery      Delivery[]
 }
@@ -31,7 +32,6 @@ model Delivery {
   distance  Int
   cost      Decimal @db.Decimal(10,2)
   date      DateTime
-  phone     String
 
   user      User   @relation(fields: [userId], references: [id])
 }
