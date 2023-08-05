@@ -109,6 +109,10 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
 
   console.debug({ data });
 
+  if (!data.length) {
+    return res.status(400).json({ error: { code: 400, message: "Missing params" } });
+  }
+
   try {
     for (const vp of data) {
       console.debug({ vp });
