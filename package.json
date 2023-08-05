@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/isoldo/dpc/issues"
   },
-  "homepage": "https://github.com/isoldo/dpc#readme"
+  "homepage": "https://github.com/isoldo/dpc#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
