@@ -2,11 +2,12 @@ import express from "express";
 
 const app = express();
 const port = 3000;
+const appName = "(isoldo) Delivery Price Calculator";
 
-app.get('/', (_req, res) => {
-  res.send('Hello World!')
+app.get('/api/health', (_req, res) => {
+  res.status(200).send('ALIVE');
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.info(`${appName} listening on port ${port}`);
 })
