@@ -2,8 +2,10 @@
   "name": "dpc",
   "version": "1.0.0",
   "description": "Delivery Price Calculator",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc --project ./tsconfig.build.json",
+    "start": "yarn build && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +23,7 @@
     "url": "https://github.com/isoldo/dpc/issues"
   },
   "homepage": "https://github.com/isoldo/dpc#readme",
+  "type": "module",
   "dependencies": {
     "dotenv": "^16.3.1",
     "express": "^4.18.2"
