@@ -2,10 +2,10 @@
   "name": "dpc",
   "version": "1.0.0",
   "description": "Delivery Price Calculator",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc --project ./tsconfig.build.json",
-    "start": "yarn build && node dist/index.js",
+    "start": "yarn build && node dist/src/index.js",
     "test": "jest"
   },
   "repository": {
