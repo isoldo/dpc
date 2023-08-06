@@ -1,5 +1,6 @@
-import { FixedPrices, PrismaClient, VariablePrices } from "@prisma/client";
+import { PrismaClient, VariablePrices } from "@prisma/client";
 import express from "express";
+import { fetchFixedPrices, fetchVariablePrices, updateFixedPrices, updateVariablePrices } from "../db/index.js";
 
 const prisma = new PrismaClient();
 
@@ -42,82 +43,66 @@ async function handlePutPrices(req: express.Request, res: express.Response, id?:
 }
 
 async function handleGetFixedPrices(_req: express.Request, res: express.Response) {
-  const fixedCosts = await prisma.fixedPrices.findMany({
-    where: {
-      active: true
+  try {
+    const data = await fetchFixedPrices();
+    if (data) {
+      return res.status(200).json({ data });
     }
-  });
-  if (fixedCosts.length) {
-    if (fixedCosts.length > 1) {
-      console.warn(`Database error: more than one active fixed costs entry (${fixedCosts.length})`);
-    }
-    return res.status(200).json({ fixedCosts });
+    return res.status(404).json({ error: { code: 404, message: "No fixed price entries found" } });
+  } catch (e) {
+    const err = e as Error;
+    console.error(err.message);
+    return res.status(500).json({ error: { code: 500, message: "Error fetching fixed prices" } });
   }
-  return res.status(500).json({ error: { code: 500, message: "No active fixed costs entry in the DB" } });
 }
 
 async function handleGetVariablePrices(_req: express.Request, res: express.Response) {
-  const variableCosts = await prisma.variablePrices.findMany();
-  return res.status(200).json({ variableCosts });
+  try {
+    const data = await fetchVariablePrices();
+    if (data) {
+      return res.status(200).json({ data });
+    }
+    return res.status(400).json({ error: { code: 404, message: "No variable price entries found" } });
+  } catch (e) {
+    const err = e as Error;
+    console.error(`>>>>>> ERROR: ${err.message}`);
+    return res.status(500).json({ error: { code: 500, message: "Error fetching variable prices"}})
+  }
 }
 
 async function handlePutFixedPrices(req: express.Request, res: express.Response) {
-  const params: FixedPrices = req.body;
-    console.debug({params});
+  const { base, additionalPackage } = req.body;
+  console.debug({ base, additionalPackage });
 
-    if (isNaN(params.base) || isNaN(params.additionalPackage)) {
-      return res.status(400).json({ error: { code: 400, message: "Incomplete body" } });
-    }
+  if (isNaN(base) || isNaN(additionalPackage)) {
+    return res.status(400).json({ error: { code: 400, message: "Incomplete body" } });
+  }
 
-    if (params.base < 0 || params.additionalPackage < 0) {
-      return res.status(400).json({ error: { code: 400, message: "Prices must not be negative"}});
-    }
+  if (base < 0 || additionalPackage < 0) {
+    return res.status(400).json({ error: { code: 400, message: "Prices must not be negative"}});
+  }
 
-    const result = await updateFixedCosts(params);
-    console.debug({ result });
+  const data = await updateFixedPrices({ base, additionalPackage });
+  console.debug({ data });
 
-    if (result) {
-      return res.status(200).json({ result });
-    }
+  if (data) {
+    return res.status(200).json({ data });
+  }
 
-    return res.status(500).json({ code: 500, message: "Error updating fixed prices" });
-}
-
-async function updateFixedCosts(params: FixedPrices) {
-  const result = await prisma.$transaction( async (pc) => {
-    const activeRow = await pc.fixedPrices.findMany({ where: { active: true } });
-    const activeIds = activeRow.map( row => row.id);
-    const newRecord = await pc.fixedPrices.create({
-      data: {
-        base: params.base,
-        additionalPackage: params.additionalPackage,
-        active: true
-      }
-    });
-    // just in case there were multiple active fixed costs records
-    await pc.fixedPrices.updateMany(
-      {
-        where: { id: { in: activeIds } },
-        data: { active: false }
-      }
-    );
-    return newRecord;
-  });
-
-  return result;
+  return res.status(500).json({ code: 500, message: "Error updating fixed prices" });
 }
 
 async function handlePutVariablePrices(req: express.Request, res: express.Response) {
-  const data: VariablePrices[] = req.body;
+  const newPrices: VariablePrices[] = req.body;
 
-  console.debug({ data });
+  console.debug({ newPrices });
 
-  if (!data.length) {
+  if (!newPrices.length) {
     return res.status(400).json({ error: { code: 400, message: "Missing params" } });
   }
 
   try {
-    for (const vp of data) {
+    for (const vp of newPrices) {
       const paramCheck = !isNaN(vp.start) && !isNaN(vp.end) && !isNaN(vp.cost);
 
       if (!paramCheck) {
@@ -129,7 +114,7 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
     return res.status(500).json({ error: { code: 500, message: "Internal server error" } });
   }
 
-  const sortedData = [...data].sort((a, b) => a.start - b.start);
+  const sortedData = [...newPrices].sort((a, b) => a.start - b.start);
 
   if (!isExhaustive(sortedData)) {
     return res.status(400).json({ error: { code: 400, message: "Input not exhaustive" } });
@@ -139,15 +124,9 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
     return res.status(400).json({ error: { code: 400, message: "Input not contiguous" } });
   }
 
-  const result = await prisma.$transaction( async (pc) => {
-    await pc.variablePrices.deleteMany();
-    return await pc.variablePrices.createMany( {
-      data: sortedData
-    })
-  });
-
-  if (result) {
-    return res.status(200).json({ result });
+  const data = await updateVariablePrices(sortedData);
+  if (data) {
+    return res.status(200).json({ data });
   }
 
   return res.status(500).json({ code: 500, message: "Error updating variable prices"})
