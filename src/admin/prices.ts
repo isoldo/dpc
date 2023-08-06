@@ -98,32 +98,10 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
 
   console.debug({ newPrices });
 
-  if (!newPrices.length) {
-    return errorFactory(res, 400, "Missing params");
-  }
-
-  try {
-    for (const vp of newPrices) {
-      const paramCheck = !isNaN(vp.start) && !isNaN(vp.end) && !isNaN(vp.cost);
-
-      if (!paramCheck) {
-        return errorFactory(res, 400, "Invalid params");
-      }
-    }
-  } catch (e) {
-    const err = e as Error;
-    console.error(`>>>>>> ERROR: ${err.message}`);
-    return errorFactory(res, 500, "Internal server error")
-  }
-
-  const sortedData = [...newPrices].sort((a, b) => a.start - b.start);
-
-  if (!isExhaustive(sortedData)) {
-    return errorFactory(res, 400, "Input not exhaustive");
-  }
-
-  if (!isContiguous(sortedData)) {
-    return errorFactory(res, 400, "Input not contiguous");
+  const sortedData = variablePricesParamCheck(res, newPrices);
+  if (!sortedData) {
+    // res is already set, just return
+    return;
   }
 
   const data = await updateVariablePrices(sortedData);
@@ -132,6 +110,52 @@ async function handlePutVariablePrices(req: express.Request, res: express.Respon
   }
 
   return errorFactory(res, 500, "Error updating variable prices");
+}
+
+function variablePricesParamCheck(res: express.Response, params: VariablePrices[]): VariablePrices[] | null {
+  if (!params.length) {
+    errorFactory(res, 400, "Missing params");
+    return null;
+  }
+
+  try {
+    for (const vp of params) {
+      const paramCheck = !isNaN(vp.start) && !isNaN(vp.cost);
+
+      if (!paramCheck) {
+        errorFactory(res, 400, "Invalid params");
+        return null;
+      }
+
+      if (vp.end !== undefined && vp.end !== -1.0 && vp.end < vp.start) {
+        console.warn(`Senseless interval ${vp.start}-${vp.end}. Swapping`);
+        [vp.start, vp.end] = [vp.end, vp.start];
+      }
+
+      if (vp.end === undefined) {
+        vp.end = -1;
+      }
+    }
+  } catch (e) {
+    const err = e as Error;
+    console.error(`>>>>>> ERROR: ${err.message}`);
+    errorFactory(res, 500, "Internal server error");
+    return null;
+  }
+
+  const sortedData = [...params].sort((a, b) => a.start - b.start);
+
+  if (!isExhaustive(sortedData)) {
+    errorFactory(res, 400, "Input not exhaustive");
+    return null;
+  }
+
+  if (!isContiguous(sortedData)) {
+    errorFactory(res, 400, "Input not contiguous");
+    return null;
+  }
+
+  return sortedData;
 }
 
 function isContiguous(sortedData: VariablePrices[]): boolean {
