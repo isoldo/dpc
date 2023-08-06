@@ -1,4 +1,5 @@
 import { FixedPrices, PrismaClient, User, VariablePrices } from "@prisma/client";
+import { DeliveryParameters } from "../delivery/index.js";
 
 const prismaClient = new PrismaClient();
 
@@ -68,4 +69,8 @@ export async function updateVariablePrices(sortedData: VariablePrices[]) {
       data: sortedData
     })
   });
+}
+
+export async function createDelivery(params: DeliveryParameters) {
+  return await prismaClient.delivery.create({ data: params });
 }

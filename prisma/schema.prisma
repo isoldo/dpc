@@ -26,14 +26,17 @@ model User {
 }
 
 model Delivery {
-  id            String @id @unique @default(uuid())
-  userId        String
-  distance      Int
-  packageCount  Int
-  cost          Float
-  date          DateTime
+  id                    String @id @unique @default(uuid())
+  userId                String
+  distance              Int
+  packageCount          Int
+  cost                  Float
+  baseCost              Float
+  additionalPackageCost Float
+  distanceCost          Float
+  date                  DateTime
 
-  user          User   @relation(fields: [userId], references: [id])
+  user                  User   @relation(fields: [userId], references: [id])
 }
 
 model FixedPrices {

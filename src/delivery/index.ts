@@ -1,30 +1,20 @@
 import express from "express";
-import { createUser, fetchFixedPrices, fetchUserByMail, fetchVariablePrices } from "../db/index.js";
+import { createDelivery, createUser, fetchFixedPrices, fetchUserByMail, fetchVariablePrices } from "../db/index.js";
 import { errorFactory } from "../utils/errorFactory.js";
 
-interface DeliveryParameters {
+export interface DeliveryParameters {
   packageCount: number;
   distance: number;
-  email: string;
-  phone: string;
   date: Date;
-  name: string;
-  lastName: string;
+  userId: string;
+  cost: number;
+  baseCost: number;
+  additionalPackageCost: number;
+  distanceCost: number;
 }
 
 export async function deliveryHandler(req: express.Request, res: express.Response) {
   const { packageCount, distance, email, phone, date, name, lastName } = req.body;
-  const data: DeliveryParameters = {
-    distance,
-    packageCount,
-    email,
-    phone,
-    date,
-    name,
-    lastName
-  };
-
-  console.debug({ deliveryParameters: data });
 
   let user = await fetchUserByMail(email);
   if (!user) {
@@ -44,6 +34,10 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
 
   let cost = fixedPrices.base + (packageCount - 1) * fixedPrices.additionalPackage;
 
+  const baseCost = fixedPrices.base;
+  const additionalPackageCost = (packageCount - 1) * fixedPrices.additionalPackage;
+  let distanceCost = 0;
+
   for (const vp of variablePrices) {
     console.debug({ vp });
     if (vp.start < distance) {
@@ -51,14 +45,29 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
       if (vp.end === -1 || vp.end > distance) {
         console.debug(`Distance fits in the interval [${vp.start}, ${vp.end}]`);
         console.debug(`Cost += ${(distance-vp.start) * vp.cost}`);
-        cost += (distance - vp.start) * vp.cost;
+        distanceCost += (distance - vp.start) * vp.cost;
       } else {
         console.debug(`Distance exceeds the interval [${vp.start}, ${vp.end}]`);
         console.debug(`Cost += ${(vp.end-vp.start)*vp.cost}`);
-        cost += (vp.end - vp.start) * vp.cost;
+        distanceCost += (vp.end - vp.start) * vp.cost;
       }
     }
   }
 
-  return res.status(200).json({ data: cost });
+  const data: DeliveryParameters = {
+    distance,
+    packageCount,
+    date: new Date(date),
+    userId: user.id,
+    cost: baseCost + additionalPackageCost + distanceCost,
+    baseCost,
+    additionalPackageCost,
+    distanceCost
+  };
+
+  console.debug({ deliveryParameters: data });
+
+  await createDelivery(data);
+
+  return res.status(200).json({ data });
 }
