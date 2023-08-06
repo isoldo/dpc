@@ -1,5 +1,6 @@
 import { FixedPrices, PrismaClient, VariablePrices } from "@prisma/client";
 import express from "express";
+import { fetchFixedPrices, fetchVariablePrices } from "../db/index.js";
 
 const prisma = new PrismaClient();
 
@@ -42,23 +43,23 @@ async function handlePutPrices(req: express.Request, res: express.Response, id?:
 }
 
 async function handleGetFixedPrices(_req: express.Request, res: express.Response) {
-  const fixedCosts = await prisma.fixedPrices.findMany({
-    where: {
-      active: true
+  try {
+    const data = await fetchFixedPrices();
+    if (data) {
+      return res.status(200).json({ data });
+    } else {
+      return res.status(404).json({ error: { code: 404, message: "No fixed price entries found" } });
     }
-  });
-  if (fixedCosts.length) {
-    if (fixedCosts.length > 1) {
-      console.warn(`Database error: more than one active fixed costs entry (${fixedCosts.length})`);
-    }
-    return res.status(200).json({ fixedCosts });
+  } catch (e) {
+    const err = e as Error;
+    console.error(err.message);
+    return res.status(500).json({ error: { code: 500, message: "Error fetching fixed costs" } });
   }
-  return res.status(500).json({ error: { code: 500, message: "No active fixed costs entry in the DB" } });
 }
 
 async function handleGetVariablePrices(_req: express.Request, res: express.Response) {
-  const variableCosts = await prisma.variablePrices.findMany();
-  return res.status(200).json({ variableCosts });
+  const data = await fetchVariablePrices();
+  return res.status(200).json({ data });
 }
 
 async function handlePutFixedPrices(req: express.Request, res: express.Response) {
