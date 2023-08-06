@@ -74,3 +74,12 @@ export async function updateVariablePrices(sortedData: VariablePrices[]) {
 export async function createDelivery(params: DeliveryParameters) {
   return await prismaClient.delivery.create({ data: params });
 }
+
+export async function isAdmin(email: string, passwordHash: string): Promise<boolean> {
+  const data = await prismaClient.admin.findMany({ where: {
+    email,
+    passwordHash
+  }});
+
+  return !!data.length;
+}

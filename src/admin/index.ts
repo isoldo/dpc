@@ -2,8 +2,16 @@ import express from "express";
 import { isAuthorized } from "../auth.js";
 import { handlePrices } from "./prices.js";
 import { errorFactory } from "../utils/errorFactory.js";
+import crypto from "crypto";
+import { isAdmin } from "../db/index.js";
+import jwt from "jsonwebtoken";
+import 'dotenv/config';
 
 export async function adminHandler(req: express.Request, res: express.Response, field: string, id?: string) {
+  if (field === "login") {
+    return handleAdminLogin(req, res);
+  }
+
   const authorized = await isAuthorized(req);
 
   if (authorized) {
@@ -27,4 +35,21 @@ async function adminAuthorizedHandler(req: express.Request, res: express.Respons
   } else {
     return errorFactory(res, 422, `Unsupported parameter: ${field}`);
   }
+}
+
+async function handleAdminLogin(req: express.Request, res: express.Response) {
+  const { un, pw } = req.body;
+  const pwHash = crypto.createHash("sha256").update(pw, 'ascii').digest().toString("hex");
+
+  const adminFound = await isAdmin(un, pwHash);
+
+  const secretKey = process.env.SECRET_KEY as string;
+
+  if (adminFound) {
+    const token = jwt.sign({ isAdmin: true }, secretKey );
+    console.debug({ token });
+    return res.status(200).json({ token });
+  }
+
+  return errorFactory(res, 401, "Unauthorized");
 }
