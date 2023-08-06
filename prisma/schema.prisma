@@ -22,18 +22,18 @@ model User {
   name          String
   lastName      String
   phone         String
-  deliveryCount Int         @default(0)
   Delivery      Delivery[]
 }
 
 model Delivery {
-  id        String @id @unique @default(uuid())
-  userId    String
-  distance  Int
-  cost      Float
-  date      DateTime
+  id            String @id @unique @default(uuid())
+  userId        String
+  distance      Int
+  packageCount  Int
+  cost          Float
+  date          DateTime
 
-  user      User   @relation(fields: [userId], references: [id])
+  user          User   @relation(fields: [userId], references: [id])
 }
 
 model FixedPrices {
