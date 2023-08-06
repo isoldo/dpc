@@ -47,19 +47,27 @@ async function handleGetFixedPrices(_req: express.Request, res: express.Response
     const data = await fetchFixedPrices();
     if (data) {
       return res.status(200).json({ data });
-    } else {
-      return res.status(404).json({ error: { code: 404, message: "No fixed price entries found" } });
     }
+    return res.status(404).json({ error: { code: 404, message: "No fixed price entries found" } });
   } catch (e) {
     const err = e as Error;
     console.error(err.message);
-    return res.status(500).json({ error: { code: 500, message: "Error fetching fixed costs" } });
+    return res.status(500).json({ error: { code: 500, message: "Error fetching fixed prices" } });
   }
 }
 
 async function handleGetVariablePrices(_req: express.Request, res: express.Response) {
-  const data = await fetchVariablePrices();
-  return res.status(200).json({ data });
+  try {
+    const data = await fetchVariablePrices();
+    if (data) {
+      return res.status(200).json({ data });
+    }
+    return res.status(400).json({ error: { code: 404, message: "No variable price entries found" } });
+  } catch (e) {
+    const err = e as Error;
+    console.error(`>>>>>> ERROR: ${err.message}`);
+    return res.status(500).json({ error: { code: 500, message: "Error fetching variable prices"}})
+  }
 }
 
 async function handlePutFixedPrices(req: express.Request, res: express.Response) {

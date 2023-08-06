@@ -11,8 +11,13 @@ export async function fetchFixedPrices(): Promise<FixedPrices | null> {
   return null;
 }
 
-export async function fetchVariablePrices(): Promise<VariablePrices[]> {
-  return await prismaClient.variablePrices.findMany();
+export async function fetchVariablePrices(): Promise<VariablePrices[] | null> {
+  const response = await prismaClient.variablePrices.findMany();
+  if (response.length) {
+    return response;
+  }
+
+  return null;
 }
 
 interface FixedPricesParams {
