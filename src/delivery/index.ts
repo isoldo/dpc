@@ -32,8 +32,6 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     return errorFactory(res, 500, "Variable prices not defined");
   }
 
-  let cost = fixedPrices.base + (packageCount - 1) * fixedPrices.additionalPackage;
-
   const baseCost = fixedPrices.base;
   const additionalPackageCost = (packageCount - 1) * fixedPrices.additionalPackage;
   let distanceCost = 0;
