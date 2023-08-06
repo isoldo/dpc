@@ -1,4 +1,5 @@
-import { FixedPrices, PrismaClient, VariablePrices } from "@prisma/client";
+import { FixedPrices, PrismaClient, User, VariablePrices } from "@prisma/client";
+import { DeliveryParameters } from "../delivery/index.js";
 
 const prismaClient = new PrismaClient();
 
@@ -18,6 +19,19 @@ export async function fetchVariablePrices(): Promise<VariablePrices[] | null> {
   }
 
   return null;
+}
+
+export async function fetchUserByMail(email: string): Promise<User | null> {
+  return await prismaClient.user.findUnique({ where: { email }});
+}
+
+export async function createUser(email: string, phone: string, name: string, lastName: string) {
+  return await prismaClient.user.create({ data: {
+    email,
+    phone,
+    name,
+    lastName
+  }});
 }
 
 interface FixedPricesParams {
@@ -55,4 +69,8 @@ export async function updateVariablePrices(sortedData: VariablePrices[]) {
       data: sortedData
     })
   });
+}
+
+export async function createDelivery(params: DeliveryParameters) {
+  return await prismaClient.delivery.create({ data: params });
 }
