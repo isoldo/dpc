@@ -158,7 +158,7 @@ function variablePricesParamCheck(res: express.Response, params: VariablePrices[
   return sortedData;
 }
 
-function isContiguous(sortedData: VariablePrices[]): boolean {
+export function isContiguous(sortedData: VariablePrices[]): boolean {
   console.debug({ sortedData });
 
   let end = sortedData[0].end;
@@ -173,6 +173,6 @@ function isContiguous(sortedData: VariablePrices[]): boolean {
   return true;
 }
 
-function isExhaustive(sortedData: VariablePrices[]): boolean {
+export function isExhaustive(sortedData: VariablePrices[]): boolean {
   return !(sortedData[0].start !== 0.0 || sortedData[sortedData.length-1].end !== -1.0);
 }
