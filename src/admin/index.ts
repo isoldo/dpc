@@ -1,6 +1,7 @@
 import express from "express";
 import { isAuthorized } from "../auth.js";
 import { handlePrices } from "./prices.js";
+import { errorFactory } from "../utils/errorFactory.js";
 
 export async function adminHandler(req: express.Request, res: express.Response, field: string, id?: string) {
   const authorized = await isAuthorized(req);
@@ -9,10 +10,12 @@ export async function adminHandler(req: express.Request, res: express.Response, 
     try {
       adminAuthorizedHandler(req, res, field, id);
     } catch (e) {
-      console.error(`>>>>>> ERROR: ${(e as Error).message}`);
+      const err =  e as Error;
+      console.error(`>>>>>> ERROR: ${err.message}`);
+      return errorFactory(res, 500, err.message);
     }
   } else {
-    res.status(401).json({ error: { code: 401, message: "Unauthorized"}});
+    return errorFactory(res, 401, "Unauthorized");
   }
 }
 
@@ -22,6 +25,6 @@ async function adminAuthorizedHandler(req: express.Request, res: express.Respons
   if (field === "prices") {
     handlePrices(req, res, id);
   } else {
-    res.status(422).json({ message: `Unsupported parameter: ${field}`, code: 422 });
+    return errorFactory(res, 422, `Unsupported parameter: ${field}`);
   }
 }
