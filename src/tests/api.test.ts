@@ -1,10 +1,20 @@
+import { PrismaClient } from "@prisma/client";
 import { listener } from "../index.js";
 import request from "supertest";
+import { createHash } from "crypto";
+import jwt from "jsonwebtoken";
 
 let server;
+let email: string;
+let pw = "password";
 
-beforeAll(() => {
+beforeAll(async () => {
   server = listener;
+  const prismaClient = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL} } });
+  email = "dummy@admin.mail";
+  const passwordHash = createHash("sha256").update(pw, "ascii").digest().toString("hex");
+  const admin = await prismaClient.admin.create({ data: { email, passwordHash }});
+  console.log({ url: process.env.DATABASE_URL, admin });
 });
 
 afterAll(async () => {
@@ -25,6 +35,22 @@ describe("Check the health API", () =>
         const response = await request(server).post('/api/health').send({});
         expect(response.status).toBe(200);
         expect(response.body).toEqual({ status: "ALIVE" });
+      }
+    );
+  }
+);
+
+describe("Check the admin API", () =>
+  {
+    let token: string;
+    it("should return a verifiable JWT for an existing admin",
+      async () => {
+        const response = await request(server).post("/api/admin/login").send({ un: email, pw});
+        token = response.body.token;
+        const verifiedToken = jwt.verify(token, (process.env.SECRET_KEY as string)) as jwt.JwtPayload;
+        const isAdmin = verifiedToken.isAdmin;
+        expect(response.status).toBe(200);
+        expect(isAdmin).toBe(true);
       }
     );
   }
