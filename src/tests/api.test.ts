@@ -96,5 +96,16 @@ describe("Check the admin API", () =>
         expect(response.status).toBe(404);
       }
     );
+    it("should return 200 for PUT fixed prices when DB is empty",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send(
+          {
+            base: 2,
+            additionalPackage: 0.25
+          }
+        );
+        expect(response.status).toBe(200);
+      }
+    );
   }
 );
