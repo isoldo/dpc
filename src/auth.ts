@@ -16,7 +16,7 @@ export async function isAuthorized(req: express.Request): Promise<boolean> {
 
     console.debug({ payload });
 
-    return payload.isAdmin;
+    return !!payload.isAdmin;
   } catch (e) {
     const err = e as Error;
     console.error(`>>>>>> ERROR: ${err.message}`);
