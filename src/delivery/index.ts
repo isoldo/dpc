@@ -18,8 +18,21 @@ export interface DeliveryParameters {
 export async function deliveryHandler(req: express.Request, res: express.Response) {
   const { packageCount, distance, email, phone, date, name, lastName } = req.body;
 
+  if (!name || !lastName || !date || !phone || !email || (packageCount === undefined) || (distance === undefined)) {
+    return errorFactory(res, 400, "Missing parameters");
+  }
+
+  if (packageCount < 1) {
+    return errorFactory(res, 400, "Invalid package count");
+  }
+
+  if (distance < 1) {
+    return errorFactory(res, 400, "Invalid distance");
+  }
+
   let user = await fetchUserByMail(email);
   if (!user) {
+    console.debug({ newUser: { email, phone, name, lastName }});
     user = await createUser(email, phone, name, lastName);
     if (!user) {
       return errorFactory(res, 500, "Error creating a user in DB");
