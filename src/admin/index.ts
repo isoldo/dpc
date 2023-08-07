@@ -43,12 +43,16 @@ async function handleAdminLogin(req: express.Request, res: express.Response) {
 
   const adminFound = await isAdmin(un, pwHash);
 
-  const secretKey = process.env.SECRET_KEY as string;
 
   if (adminFound) {
-    const token = jwt.sign({ isAdmin: true }, secretKey );
-    console.debug({ token });
-    return res.status(200).json({ token });
+    try {
+      const secretKey = process.env.SECRET_KEY as string;
+      const token = jwt.sign({ isAdmin: true }, secretKey );
+      console.debug({ token });
+      return res.status(200).json({ token });
+    } catch (e) {
+      return errorFactory(res, 500, "Missing secret key");
+    }
   }
 
   return errorFactory(res, 401, "Unauthorized");
