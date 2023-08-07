@@ -2,6 +2,7 @@ import express from "express";
 import { createDelivery, createUser, fetchFixedPrices, fetchUserByMail, fetchVariablePrices } from "../db/index.js";
 import { errorFactory } from "../utils/errorFactory.js";
 import { calculateDeliveryPrice } from "./calculator.js";
+import { DeliveryMailParameters, sendDeliveryMail } from "../email/index.js";
 
 export interface DeliveryParameters {
   packageCount: number;
@@ -43,7 +44,23 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
 
   console.debug({ deliveryParameters: data });
 
-  await createDelivery(data);
+  const createdDelivery = await createDelivery(data);
+
+  const emailParams: DeliveryMailParameters = {
+    email: user.email,
+    user: {
+      name: user.name,
+      lastName: user.lastName
+    },
+    delivery: {
+      price: createdDelivery.cost,
+      packageCount: createdDelivery.packageCount,
+      date: new Date(createdDelivery.date),
+      distance
+    }
+  }
+
+  await sendDeliveryMail(emailParams);
 
   return res.status(200).json({ data });
 }
