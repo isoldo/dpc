@@ -7,7 +7,7 @@ Delivery Price Calculator
 - [x] admin can create a calculator
 - [x] admin can update an existing calculator
 - [x] anon user can submit request
-- [ ] anon user receives an email confirmation
+- [x] anon user receives an email confirmation
 
 ### Extra
 
