@@ -1,4 +1,4 @@
-export const emailConfig = {
+export const mailServiceConfig = {
   service: "gmail",
   host: "smtp.gmail.com",
   port: 587,
