@@ -43,6 +43,18 @@ describe("Check the health API", () =>
 describe("Check the admin API", () =>
   {
     let token: string;
+    it("should return 401 for a non-existing admin",
+      async () => {
+        const response = await request(server).post("/api/admin/login").send({ un: "dont-exist@corp.com", pw});
+        expect(response.status).toBe(401);
+      }
+    );
+    it("should return 401 for a wrong password",
+      async () => {
+        const response = await request(server).post("/api/admin/login").send({ un: email, pw: "wrongpass"});
+        expect(response.status).toBe(401);
+      }
+    );
     it("should return a verifiable JWT for an existing admin",
       async () => {
         const response = await request(server).post("/api/admin/login").send({ un: email, pw});

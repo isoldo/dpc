@@ -43,7 +43,6 @@ async function handleAdminLogin(req: express.Request, res: express.Response) {
 
   const adminFound = await isAdmin(un, pwHash);
 
-
   if (adminFound) {
     try {
       const secretKey = process.env.SECRET_KEY as string;
