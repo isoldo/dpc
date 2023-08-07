@@ -43,6 +43,18 @@ describe("Check the health API", () =>
 describe("Check the admin API", () =>
   {
     let token: string;
+    it("should return 400 for missing email",
+      async () => {
+        const response = await request(server).post("/api/admin/login").send({ pw: "dont-care" });
+        expect(response.status).toBe(400);
+      }
+    );
+    it("should return 400 for missing password",
+      async () => {
+        const response = await request(server).post("/api/admin/login").send({ un: "dont-care" });
+        expect(response.status).toBe(400);
+      }
+    );
     it("should return 401 for a non-existing admin",
       async () => {
         const response = await request(server).post("/api/admin/login").send({ un: "dont-exist@corp.com", pw});
