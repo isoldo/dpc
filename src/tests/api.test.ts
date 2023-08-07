@@ -43,6 +43,7 @@ describe("Check the health API", () =>
 describe("Check the admin API", () =>
   {
     let token: string;
+    const wrongToken = jwt.sign({ isAdmin: true }, "wrongKey" );
     it("should return 400 for missing email",
       async () => {
         const response = await request(server).post("/api/admin/login").send({ pw: "dont-care" });
@@ -75,6 +76,24 @@ describe("Check the admin API", () =>
         const isAdmin = verifiedToken.isAdmin;
         expect(response.status).toBe(200);
         expect(isAdmin).toBe(true);
+      }
+    );
+    it("should return 401 for GET fixed prices with no token",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/fixed");
+        expect(response.status).toBe(401);
+      }
+    );
+    it("should return 401 for GET fixed prices with a wrong token",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/fixed").set("authorization", wrongToken);
+        expect(response.status).toBe(401);
+      }
+    );
+    it("should return 404 for GET fixed prices when DB is empty",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/fixed").set("authorization", token);
+        expect(response.status).toBe(404);
       }
     );
   }
