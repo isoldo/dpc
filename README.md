@@ -6,7 +6,7 @@ Delivery Price Calculator
 - [x] admin login
 - [x] admin can create a calculator
 - [x] admin can update an existing calculator
-- [ ] anon user can submit request
+- [x] anon user can submit request
 - [ ] anon user receives an email confirmation
 
 ### Extra
@@ -16,8 +16,8 @@ Delivery Price Calculator
 
 ## Deliverables
 
-- [ ] REST API (express, Typescript)
-- [ ] Database (PostreSQL)
+- [x] REST API (express, Typescript)
+- [x] Database (PostgreSQL)
 - [ ] Documentation (Swagger)
 - [ ] Unit tests
 - [ ] Integration tests
