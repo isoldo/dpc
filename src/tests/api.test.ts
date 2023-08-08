@@ -92,51 +92,56 @@ describe("Check admin login API", () =>
 
 describe("Check admin API authorization", () =>
   {
+    const getAuth = async (url: string, token: string) => request(server).get(url).set("authorization", token);
+    const putAuth = async (url: string, token: string, body: Object) =>
+      request(server).get(url).set("authorization", token).send(body);
+    const getAnon = async (url: string) => request(server).get(url);
+    const putAnon = async (url: string, body: Object) => request(server).get(url).send(body);
     it("should return 401 for GET fixed prices with no token",
       async () => {
-        const response = await request(server).get(urls.fixed);
+        const response = await getAnon(urls.fixed);
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for GET fixed prices with a wrong token",
       async () => {
-        const response = await request(server).get(urls.fixed).set("authorization", wrongToken);
+        const response = await getAuth(urls.fixed, wrongToken);
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for PUT fixed prices with no token",
       async () => {
-        const response = await request(server).put(urls.fixed).send({});
+        const response = await putAnon(urls.fixed,{});
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for PUT fixed prices with a wrong token",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", wrongToken).send({});
+        const response = await putAuth(urls.fixed, wrongToken, {});
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for GET variable prices with no token",
       async () => {
-        const response = await request(server).get(urls.variable);
+        const response = await getAnon(urls.variable);
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for GET variable prices with a wrong token",
       async () => {
-        const response = await request(server).get(urls.variable).set("variable", wrongToken);
+        const response = await getAuth(urls.variable, wrongToken);
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for PUT variable prices with no token",
       async () => {
-        const response = await request(server).put(urls.variable).send({});
+        const response = await putAnon(urls.variable, {});
         expect(response.status).toBe(401);
       }
     );
     it("should return 401 for PUT variable prices with a wrong token",
       async () => {
-        const response = await request(server).put(urls.variable).set("variable", wrongToken).send({});
+        const response = await putAuth(urls.variable, wrongToken, {});
         expect(response.status).toBe(401);
       }
     );
@@ -195,7 +200,8 @@ describe("Check the fixed prices API", () =>
     );
     it("should return 400 for PUT fixed prices with missing base price param",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", token).send({ additionalPackage: 4 });
+        const response = await request(server).put(urls.fixed).set("authorization", token).send(
+          { additionalPackage: 4 });
         expect(response.status).toBe(400);
       }
     );
