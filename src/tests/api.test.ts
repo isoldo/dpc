@@ -14,7 +14,8 @@ const urls = {
   health: "/api/health",
   login: "/api/admin/login",
   fixed: "/api/admin/prices/fixed",
-  variable: "/api/admin/prices/variable"
+  variable: "/api/admin/prices/variable",
+  delivery: "/api/request-delivery"
 };
 
 beforeAll(async () => {
@@ -292,6 +293,38 @@ describe("Check the variable prices API", () =>
       async () => {
         const response = await put(variablePricesMissingParams);
         expect(response.status).toBe(400);
+      }
+    );
+  }
+);
+
+describe("Check the request delivery API", () =>
+  {
+    interface DeliveryParams {
+      packageCount?: number;
+      distance?: number;
+      email?: string;
+      phone?: string;
+      date?: number;
+      name?: string;
+      lastName?: string;
+    }
+    const post = async (params: DeliveryParams) => request(server).post(urls.delivery).send(params);
+    const validDeliveryRequest1 = {
+      distance: 3,
+      packageCount: 1,
+      email: "dummy@customer.com",
+      phone: "+385951234567",
+      date: Date.now(),
+      name: "Name",
+      lastName: "Last Name"
+    }
+    console.log({ validDeliveryRequest1 })
+    it("should return 200 for POST variable prices when DB is empty",
+      async () => {
+        const response = await post(validDeliveryRequest1);
+        console.log(response.body)
+        expect(response.status).toBe(200);
       }
     );
   }
