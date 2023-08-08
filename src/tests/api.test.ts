@@ -150,6 +150,9 @@ describe("Check admin API authorization", () =>
 
 describe("Check the fixed prices API", () =>
   {
+    const get = async () => request(server).get(urls.fixed).set("authorization", token);
+    const put = async (params: { base?: number, additionalPackage?: number}) =>
+      request(server).put(urls.fixed).set("authorization", token).send({ ...params });
     const fixedPrices1 = {
       base: 2,
       additionalPackage: 0.25
@@ -160,48 +163,47 @@ describe("Check the fixed prices API", () =>
     };
     it("should return 404 for GET fixed prices when DB is empty",
       async () => {
-        const response = await request(server).get(urls.fixed).set("authorization", token);
+        const response = await get();
         expect(response.status).toBe(404);
       }
     );
     it("should return 200 for PUT fixed prices when DB is empty",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", token).send(fixedPrices1);
+        const response = await put(fixedPrices1);
         expect(response.status).toBe(200);
         expect(response.body.data).toStrictEqual({ ...fixedPrices1, active: true, id: 1});
       }
     );
     it("should return 200 and the correct values for GET fixed prices",
       async () => {
-        const response = await request(server).get(urls.fixed).set("authorization", token);
+        const response = await get();
         expect(response.status).toBe(200);
         expect(response.body.data).toStrictEqual({ ...fixedPrices1, active: true, id: 1});
       }
     );
     it("should return 200 for PUT fixed prices when DB is not empty and id should be 2",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", token).send(fixedPrices2);
+        const response = await put(fixedPrices2);
         expect(response.status).toBe(200);
         expect(response.body.data).toStrictEqual({ ...fixedPrices2, active: true, id: 2});
       }
     );
     it("should return 200 and the correct updated values for GET fixed prices",
       async () => {
-        const response = await request(server).get(urls.fixed).set("authorization", token);
+        const response = await get();
         expect(response.status).toBe(200);
         expect(response.body.data).toStrictEqual({ ...fixedPrices2, active: true, id: 2});
       }
     );
     it("should return 400 for PUT fixed prices with missing additionalPackage cost param",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", token).send({ base: 4 });
+        const response = await put({ base: 4 });
         expect(response.status).toBe(400);
       }
     );
     it("should return 400 for PUT fixed prices with missing base price param",
       async () => {
-        const response = await request(server).put(urls.fixed).set("authorization", token).send(
-          { additionalPackage: 4 });
+        const response = await put({ additionalPackage: 4 });
         expect(response.status).toBe(400);
       }
     );
