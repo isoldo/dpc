@@ -19,7 +19,7 @@ app.all('/api/admin/:field/:id?', (req, res) => {
   adminHandler(req, res, field, id);
 });
 
-app.post('/api/request-delivery', (req, res) => {
+app.all('/api/request-delivery', (req, res) => {
   deliveryHandler(req, res);
 });
 

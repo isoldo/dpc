@@ -16,6 +16,9 @@ export interface DeliveryParameters {
 }
 
 export async function deliveryHandler(req: express.Request, res: express.Response) {
+  if (req.method !== "POST") {
+    return errorFactory(res, 405, `Method ${req.method} not supported`)
+  }
   const { packageCount, distance, email, phone, date, name, lastName } = req.body;
 
   if (!name || !lastName || !date || !phone || !email || (packageCount === undefined) || (distance === undefined)) {

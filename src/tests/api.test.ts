@@ -319,7 +319,13 @@ describe("Check the request delivery API", () =>
       name: "Name",
       lastName: "Last Name"
     }
-    console.log({ validDeliveryRequest1 })
+    it("should return 405 for a non POST delivery request",
+      async () => {
+        const response = await request(server).get(urls.delivery);
+        expect(response.status).toBe(405);
+      }
+    );
+    // TODO make the tests independent by PUT-ing the costs from this test
     it("should return 200 for POST delivery request, calculate the correct price and not send mail from the test suite",
       async () => {
         const response = await post(validDeliveryRequest1);
