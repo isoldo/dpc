@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 let server;
 let email: string;
 let pw = "password";
+let token: string;
+const wrongToken = jwt.sign({ isAdmin: true }, "wrongKey" );
 
 beforeAll(async () => {
   server = listener;
@@ -40,18 +42,8 @@ describe("Check the health API", () =>
   }
 );
 
-describe("Check the admin API", () =>
+describe("Check admin login API", () =>
   {
-    let token: string;
-    const wrongToken = jwt.sign({ isAdmin: true }, "wrongKey" );
-    const fixedPrices1 = {
-      base: 2,
-      additionalPackage: 0.25
-    };
-    const fixedPrices2 = {
-      base: 3,
-      additionalPackage: 0.75
-    };
     it("should return 400 for missing email",
       async () => {
         const response = await request(server).post("/api/admin/login").send({ pw: "dont-care" });
@@ -86,6 +78,19 @@ describe("Check the admin API", () =>
         expect(isAdmin).toBe(true);
       }
     );
+  }
+);
+
+describe("Check the fixed prices API", () =>
+  {
+    const fixedPrices1 = {
+      base: 2,
+      additionalPackage: 0.25
+    };
+    const fixedPrices2 = {
+      base: 3,
+      additionalPackage: 0.75
+    };
     it("should return 401 for GET fixed prices with no token",
       async () => {
         const response = await request(server).get("/api/admin/prices/fixed");
