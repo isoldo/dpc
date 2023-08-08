@@ -82,5 +82,5 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     mailStatus = "not sent";
   }
 
-  return res.status(200).json({ data, mailStatus });
+  return res.status(200).json({ data: createdDelivery, mailStatus });
 }
