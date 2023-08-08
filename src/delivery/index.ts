@@ -73,7 +73,14 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     }
   }
 
-  await sendDeliveryMail(emailParams);
+  let mailStatus: string;
+  if (process.env.SENDER_MAIL) {
+    await sendDeliveryMail(emailParams);
+    mailStatus = "sent";
+  } else {
+    console.warn("Email provider not configured, skipping mail send")
+    mailStatus = "not sent";
+  }
 
-  return res.status(200).json({ data });
+  return res.status(200).json({ data, mailStatus });
 }
