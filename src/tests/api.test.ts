@@ -44,6 +44,14 @@ describe("Check the admin API", () =>
   {
     let token: string;
     const wrongToken = jwt.sign({ isAdmin: true }, "wrongKey" );
+    const fixedPrices1 = {
+      base: 2,
+      additionalPackage: 0.25
+    };
+    const fixedPrices2 = {
+      base: 3,
+      additionalPackage: 0.75
+    };
     it("should return 400 for missing email",
       async () => {
         const response = await request(server).post("/api/admin/login").send({ pw: "dont-care" });
@@ -98,13 +106,30 @@ describe("Check the admin API", () =>
     );
     it("should return 200 for PUT fixed prices when DB is empty",
       async () => {
-        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send(
-          {
-            base: 2,
-            additionalPackage: 0.25
-          }
-        );
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send(fixedPrices1);
         expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ ...fixedPrices1, active: true, id: 1});
+      }
+    );
+    it("should return 200 and the correct values for GET fixed prices",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/fixed").set("authorization", token);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ ...fixedPrices1, active: true, id: 1});
+      }
+    );
+    it("should return 200 for PUT fixed prices when DB is not empty and id should be 2",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send(fixedPrices2);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ ...fixedPrices2, active: true, id: 2});
+      }
+    );
+    it("should return 200 and the correct updated values for GET fixed prices",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/fixed").set("authorization", token);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ ...fixedPrices2, active: true, id: 2});
       }
     );
   }
