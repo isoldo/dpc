@@ -95,6 +95,18 @@ describe("Check admin API authorization", () =>
         expect(response.status).toBe(401);
       }
     );
+    it("should return 401 for PUT fixed prices with no token",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").send({});
+        expect(response.status).toBe(401);
+      }
+    );
+    it("should return 401 for PUT fixed prices with a wrong token",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", wrongToken).send({});
+        expect(response.status).toBe(401);
+      }
+    );
   }
 );
 
