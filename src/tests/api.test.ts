@@ -107,6 +107,18 @@ describe("Check admin API authorization", () =>
         expect(response.status).toBe(401);
       }
     );
+    it("should return 401 for GET variable prices with no token",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/variable");
+        expect(response.status).toBe(401);
+      }
+    );
+    it("should return 401 for GET variable prices with a wrong token",
+      async () => {
+        const response = await request(server).get("/api/admin/prices/variable").set("variable", wrongToken);
+        expect(response.status).toBe(401);
+      }
+    );
   }
 );
 
