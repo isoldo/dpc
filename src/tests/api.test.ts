@@ -325,6 +325,8 @@ describe("Check the request delivery API", () =>
         const response = await post(validDeliveryRequest1);
         console.log(response.body)
         expect(response.status).toBe(200);
+        expect(response.body.data.cost).toBe(9);  // 3 + 3*2
+        expect(response.body.mailStatus).toEqual("not sent");
       }
     );
   }
