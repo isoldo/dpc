@@ -16,6 +16,9 @@ export interface DeliveryParameters {
 }
 
 export async function deliveryHandler(req: express.Request, res: express.Response) {
+  if (req.method !== "POST") {
+    return errorFactory(res, 405, `Method ${req.method} not supported`)
+  }
   const { packageCount, distance, email, phone, date, name, lastName } = req.body;
 
   if (!name || !lastName || !date || !phone || !email || (packageCount === undefined) || (distance === undefined)) {
@@ -73,7 +76,14 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     }
   }
 
-  await sendDeliveryMail(emailParams);
+  let mailStatus: string;
+  if (process.env.SENDER_MAIL) {
+    await sendDeliveryMail(emailParams);
+    mailStatus = "sent";
+  } else {
+    console.warn("Email provider not configured, skipping mail send")
+    mailStatus = "not sent";
+  }
 
-  return res.status(200).json({ data });
+  return res.status(200).json({ data: createdDelivery, mailStatus });
 }

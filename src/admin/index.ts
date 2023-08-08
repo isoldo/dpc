@@ -39,10 +39,14 @@ async function adminAuthorizedHandler(req: express.Request, res: express.Respons
 
 async function handleAdminLogin(req: express.Request, res: express.Response) {
   const { un, pw } = req.body;
+
+  if (!un || !pw) {
+    return errorFactory(res, 400, "Missing parameters");
+  }
+
   const pwHash = crypto.createHash("sha256").update(pw, 'ascii').digest().toString("hex");
 
   const adminFound = await isAdmin(un, pwHash);
-
 
   if (adminFound) {
     try {

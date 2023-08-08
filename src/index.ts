@@ -9,8 +9,8 @@ const appName = process.env.APP_NAME || "Default delivery price calculator app n
 
 app.use(express.json());
 
-app.get('/api/health', (_req, res) => {
-  res.status(200).send('ALIVE');
+app.all('/api/health', (_req, res) => {
+  res.status(200).json({ status: "ALIVE" });
 })
 
 app.all('/api/admin/:field/:id?', (req, res) => {
@@ -19,10 +19,12 @@ app.all('/api/admin/:field/:id?', (req, res) => {
   adminHandler(req, res, field, id);
 });
 
-app.post('/api/request-delivery', (req, res) => {
+app.all('/api/request-delivery', (req, res) => {
   deliveryHandler(req, res);
 });
 
-app.listen(port, () => {
+const listener = app.listen(port, () => {
   console.info(`${appName} listening on port ${port}`);
-})
+});
+
+export { listener };
