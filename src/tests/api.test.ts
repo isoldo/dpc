@@ -132,5 +132,17 @@ describe("Check the admin API", () =>
         expect(response.body.data).toStrictEqual({ ...fixedPrices2, active: true, id: 2});
       }
     );
+    it("should return 400 for PUT fixed prices with missing additionalPackage cost param",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send({ base: 4 });
+        expect(response.status).toBe(400);
+      }
+    );
+    it("should return 400 for PUT fixed prices with missing base price param",
+      async () => {
+        const response = await request(server).put("/api/admin/prices/fixed").set("authorization", token).send({ additionalPackage: 4 });
+        expect(response.status).toBe(400);
+      }
+    );
   }
 );
