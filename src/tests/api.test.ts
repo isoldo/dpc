@@ -52,7 +52,7 @@ describe("Check the health API", () =>
 
 describe("Check admin login API", () =>
   {
-    const login = async (params: {un?: string, pw?: string}) => request(server).post(urls.login).send({ ...params });
+    const login = async (params: { un?: string; pw?: string; }) => request(server).post(urls.login).send({ ...params });
     it("should return 400 for missing email",
       async () => {
         const response = await login({ pw: "dont-care" });;
@@ -151,7 +151,7 @@ describe("Check admin API authorization", () =>
 describe("Check the fixed prices API", () =>
   {
     const get = async () => request(server).get(urls.fixed).set("authorization", token);
-    const put = async (params: { base?: number, additionalPackage?: number}) =>
+    const put = async (params: { base?: number; additionalPackage?: number; }) =>
       request(server).put(urls.fixed).set("authorization", token).send({ ...params });
     const fixedPrices1 = {
       base: 2,
@@ -204,6 +204,93 @@ describe("Check the fixed prices API", () =>
     it("should return 400 for PUT fixed prices with missing base price param",
       async () => {
         const response = await put({ additionalPackage: 4 });
+        expect(response.status).toBe(400);
+      }
+    );
+  }
+);
+
+describe("Check the variable prices API", () =>
+  {
+    const get = async () => request(server).get(urls.variable).set("authorization", token);
+    const put = async (params: { start?: number; end?: number; cost?: number; }[]) =>
+      request(server).put(urls.variable).set("authorization", token).send(params);
+    const variablePrices = [
+      { start: 0, end: 5, cost: 1 },
+      { start: 5, end: 10, cost: 0.8 },
+      { start: 10, end: -1, cost: 0.6 },
+    ];
+    const variablePricesMissingParams = [
+      { start: 0, end: 5 },
+      { end: 10, cost: 0.8 },
+      { start: 10, end: -1, cost: 0.6 },
+    ];
+    const variablePricesUndefinedEnd = [
+      { start: 0, end: 5, cost: 1 },
+      { start: 5, end: 10, cost: 0.8 },
+      { start: 10, cost: 0.6 },
+    ];
+    const variablePricesUnsorted = [
+      { start: 0, end: 4, cost: 2 },
+      { start: 11, end: -1, cost: 0.7 },
+      { start: 4, end: 11, cost: 0.9 },
+    ];
+    const variablePricesNonExhaustive = [
+      { start: 0, end: 5, cost: 1 },
+      { start: 5, end: 10, cost: 0.8 },
+      { start: 10, end: 25, cost: 0.6 },
+    ];
+    it("should return 404 for GET variable prices when DB is empty",
+      async () => {
+        const response = await get();
+        expect(response.status).toBe(404);
+      }
+    );
+    it("should return 200 for PUT variable prices when DB is empty",
+      async () => {
+        const response = await put(variablePrices);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ count: variablePrices.length });
+      }
+    );
+    it("should return 200 and the correct values for GET variable prices",
+      async () => {
+        const response = await get();
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual(variablePrices);
+      }
+    );
+    it("should return 200 for PUT variable prices if input doesn't explicitly define end but is valid",
+      async () => {
+        const response = await put(variablePricesUndefinedEnd);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ count: variablePrices.length });
+      }
+    );
+    it("should return 200 for PUT variable prices if input is unsorted but valid",
+      async () => {
+        const response = await put(variablePricesUnsorted);
+        expect(response.status).toBe(200);
+        expect(response.body.data).toStrictEqual({ count: variablePrices.length });
+      }
+    );
+    it("should return 200 and the correct values for GET variable prices",
+      async () => {
+        const response = await get();
+        expect(response.status).toBe(200);
+        expect(response.body.data.length).toEqual(variablePricesUnsorted.length);
+        expect(response.body.data).toEqual(expect.arrayContaining(variablePricesUnsorted));
+      }
+    );
+    it("should return 400 for PUT variable prices with missing parameters",
+      async () => {
+        const response = await put(variablePricesNonExhaustive);
+        expect(response.status).toBe(400);
+      }
+    );
+    it("should return 400 for PUT variable prices if input is not exhaustive",
+      async () => {
+        const response = await put(variablePricesMissingParams);
         expect(response.status).toBe(400);
       }
     );
