@@ -93,9 +93,9 @@ describe("Check admin login API", () =>
 
 describe("Check admin API authorization", () =>
   {
-    const getAuth = async (url: string, token: string) => request(server).get(url).set("authorization", token);
+    const getAuth = async (url: string, token: string) => request(server).get(url).set("authorization", `Bearer ${token}`);
     const putAuth = async (url: string, token: string, body: Object) =>
-      request(server).get(url).set("authorization", token).send(body);
+      request(server).get(url).set("authorization", `Bearer ${token}`).send(body);
     const getAnon = async (url: string) => request(server).get(url);
     const putAnon = async (url: string, body: Object) => request(server).get(url).send(body);
     it("should return 401 for GET fixed prices with no token",
@@ -151,9 +151,9 @@ describe("Check admin API authorization", () =>
 
 describe("Check the fixed prices API", () =>
   {
-    const get = async () => request(server).get(urls.fixed).set("authorization", token);
+    const get = async () => request(server).get(urls.fixed).set("authorization", `Bearer ${token}`);
     const put = async (params: { base?: number; additionalPackage?: number; }) =>
-      request(server).put(urls.fixed).set("authorization", token).send({ ...params });
+      request(server).put(urls.fixed).set("authorization", `Bearer ${token}`).send({ ...params });
     const fixedPrices1 = {
       base: 2,
       additionalPackage: 0.25
@@ -213,9 +213,9 @@ describe("Check the fixed prices API", () =>
 
 describe("Check the variable prices API", () =>
   {
-    const get = async () => request(server).get(urls.variable).set("authorization", token);
+    const get = async () => request(server).get(urls.variable).set("authorization", `Bearer ${token}`);
     const put = async (params: { start?: number; end?: number; cost?: number; }[]) =>
-      request(server).put(urls.variable).set("authorization", token).send(params);
+      request(server).put(urls.variable).set("authorization", `Bearer ${token}`).send(params);
     const variablePrices = [
       { start: 0, end: 5, cost: 1 },
       { start: 5, end: 10, cost: 0.8 },
