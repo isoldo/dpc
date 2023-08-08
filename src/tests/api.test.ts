@@ -81,16 +81,8 @@ describe("Check admin login API", () =>
   }
 );
 
-describe("Check the fixed prices API", () =>
+describe("Check admin API authorization", () =>
   {
-    const fixedPrices1 = {
-      base: 2,
-      additionalPackage: 0.25
-    };
-    const fixedPrices2 = {
-      base: 3,
-      additionalPackage: 0.75
-    };
     it("should return 401 for GET fixed prices with no token",
       async () => {
         const response = await request(server).get("/api/admin/prices/fixed");
@@ -103,6 +95,19 @@ describe("Check the fixed prices API", () =>
         expect(response.status).toBe(401);
       }
     );
+  }
+);
+
+describe("Check the fixed prices API", () =>
+  {
+    const fixedPrices1 = {
+      base: 2,
+      additionalPackage: 0.25
+    };
+    const fixedPrices2 = {
+      base: 3,
+      additionalPackage: 0.75
+    };
     it("should return 404 for GET fixed prices when DB is empty",
       async () => {
         const response = await request(server).get("/api/admin/prices/fixed").set("authorization", token);
