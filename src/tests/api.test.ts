@@ -327,6 +327,33 @@ describe("Check the request delivery API", () =>
       name: "Name",
       lastName: "Last Name"
     };
+    const invalidPhone1 = {
+      distance: 3,
+      packageCount: 1,
+      email: "dummy@customer.com",
+      phone: "+3859512345",
+      date: Date.now(),
+      name: "Name",
+      lastName: "Last Name"
+    };
+    const invalidPhone2 = {
+      distance: 3,
+      packageCount: 1,
+      email: "dummy@customer.com",
+      phone: "09512345",
+      date: Date.now(),
+      name: "Name",
+      lastName: "Last Name"
+    };
+    const invalidPhone3 = {
+      distance: 3,
+      packageCount: 1,
+      email: "dummy@customer.com",
+      phone: "0851234567",
+      date: Date.now(),
+      name: "Name",
+      lastName: "Last Name"
+    };
     it("should return 405 for a non POST delivery request",
       async () => {
         const response = await request(server).get(urls.delivery);
@@ -354,6 +381,27 @@ describe("Check the request delivery API", () =>
       async () => {
         const response = await post(invalidDeliveryRequest1);
         expect(response.status).toBe(400);
+      }
+    );
+    it("should return 400 for POST delivery request with wrong phone number (+385)",
+      async () => {
+        const response = await post(invalidPhone1);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Invalid phone number");
+      }
+    );
+    it("should return 400 for POST delivery request with wrong phone number (095)",
+      async () => {
+        const response = await post(invalidPhone2);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Invalid phone number");
+      }
+    );
+    it("should return 400 for POST delivery request with wrong phone number (085)",
+      async () => {
+        const response = await post(invalidPhone3);
+        expect(response.status).toBe(400);
+        expect(response.body.message).toEqual("Invalid phone number");
       }
     );
     // TODO test 500 responses

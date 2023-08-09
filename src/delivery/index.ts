@@ -1,8 +1,10 @@
 import express from "express";
-import { createDelivery, createUser, fetchFixedPrices, fetchUserByMail, fetchVariablePrices } from "../db/index.js";
+import { createDelivery, createUser, fetchUserByMail } from "../db/index.js";
 import { errorFactory } from "../utils/errorFactory.js";
 import { calculateDeliveryPrice } from "./calculator.js";
 import { DeliveryMailParameters, sendDeliveryMail } from "../email/index.js";
+import { isValidPhoneNumber } from 'libphonenumber-js'
+
 
 export interface DeliveryParameters {
   packageCount: number;
@@ -95,6 +97,10 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
 
   if (distance < 1) {
     return errorFactory(res, 400, "Invalid distance");
+  }
+
+  if (!isValidPhoneNumber(phone, "HR")) {
+    return errorFactory(res, 400, "Invalid phone number");
   }
 
   let user = await fetchUserByMail(email);
