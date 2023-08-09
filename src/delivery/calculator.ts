@@ -8,11 +8,13 @@ export interface CalculatedPrice {
   base: number;
   additionalPackages: number;
   distance: number;
+  weekendTariff: boolean;
 }
 
 export async function calculateDeliveryPrice(res: express.Response,
   distance: number,
-  packageCount: number): Promise<CalculatedPrice | null>
+  packageCount: number,
+  date: Date): Promise<CalculatedPrice | null>
 {
   const fixedPrices = await fetchFixedPrices();
   if (!fixedPrices) {
@@ -29,11 +31,14 @@ export async function calculateDeliveryPrice(res: express.Response,
   const distanceCost = calculateDistanceCost(distance, variablePrices);
 
   const { total, ...fixedCostsBreakdown } = fixedCosts;
+  const applyWeekendTariff = isWeekend(date);
 
   const calculatedPrice: CalculatedPrice = {
     ...fixedCostsBreakdown,
     distance: distanceCost,
-    price: fixedCosts.total + distanceCost
+    // task specifies a hardcoded 10% increase
+    price: Number(((fixedCosts.total + distanceCost) * (applyWeekendTariff ? 1.1 : 1)).toFixed(2)),
+    weekendTariff: applyWeekendTariff
   };
 
   console.debug({ calculatedPrice });
@@ -74,4 +79,11 @@ export function calculateDistanceCost(distance: number, intervals: VariablePrice
   }
 
   return distanceCost;
+}
+
+export function isWeekend(date: Date): boolean {
+  console.log( { isw: date });
+  // 0 is Sunday, 6 is Saturday
+  const weekend = [0, 6];
+  return weekend.includes(date.getDay());
 }

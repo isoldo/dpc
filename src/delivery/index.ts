@@ -15,6 +15,7 @@ export interface DeliveryParameters {
   baseCost: number;
   additionalPackageCost: number;
   distanceCost: number;
+  weekendTariff: boolean;
 }
 
 /**
@@ -112,7 +113,9 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     }
   }
 
-  const calculatedPrice = await calculateDeliveryPrice(res, distance, packageCount);
+  const deliveryDate = new Date(Number(date));
+
+  const calculatedPrice = await calculateDeliveryPrice(res, distance, packageCount, deliveryDate);
   if (!calculatedPrice) {
     return;
   }
@@ -120,12 +123,13 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
   const data: DeliveryParameters = {
     distance,
     packageCount,
-    date: new Date(date),
+    date: deliveryDate,
     userId: user.id,
     cost: calculatedPrice.price,
     baseCost: calculatedPrice.base,
     additionalPackageCost: calculatedPrice.additionalPackages,
-    distanceCost: calculatedPrice.distance
+    distanceCost: calculatedPrice.distance,
+    weekendTariff: calculatedPrice.weekendTariff
   };
 
   console.debug({ deliveryParameters: data });
@@ -141,7 +145,7 @@ export async function deliveryHandler(req: express.Request, res: express.Respons
     delivery: {
       price: createdDelivery.cost,
       packageCount: createdDelivery.packageCount,
-      date: new Date(createdDelivery.date),
+      date: deliveryDate,
       distance
     }
   }

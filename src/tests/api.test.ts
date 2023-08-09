@@ -310,12 +310,21 @@ describe("Check the request delivery API", () =>
       lastName?: string;
     };
     const post = async (params: DeliveryParams) => request(server).post(urls.delivery).send(params);
-    const validDeliveryRequest1 = {
+    const validDeliveryRequestWorkday = {
       distance: 3,
       packageCount: 1,
       email: "dummy@customer.com",
       phone: "+385951234567",
-      date: Date.now(),
+      date: 1691560800000,  // 2023/08/09 08:00:00 - not a weekend
+      name: "Name",
+      lastName: "Last Name"
+    };
+    const validDeliveryRequestWeekend = {
+      distance: 3,
+      packageCount: 1,
+      email: "dummy@customer.com",
+      phone: "+385951234567",
+      date: 1691820000000,  // 2023/08/12 08:00:00 - not a weekend
       name: "Name",
       lastName: "Last Name"
     };
@@ -363,7 +372,7 @@ describe("Check the request delivery API", () =>
     // TODO make the tests independent by PUT-ing the costs from this test
     it("should return 200 for POST delivery request, calculate the correct price and not send mail from the test suite",
       async () => {
-        const response = await post(validDeliveryRequest1);
+        const response = await post(validDeliveryRequestWorkday);
         expect(response.status).toBe(200);
         expect(response.body.data.cost).toBe(3 + 3*2);
         expect(response.body.mailStatus).toEqual("not sent");
@@ -371,9 +380,17 @@ describe("Check the request delivery API", () =>
     );
     it("should return 200 for POST delivery request, calculate the correct price and not send mail from the test suite",
       async () => {
-        const response = await post({ ...validDeliveryRequest1, packageCount: 7, distance: 13 });
+        const response = await post({ ...validDeliveryRequestWorkday, packageCount: 7, distance: 13 });
         expect(response.status).toBe(200);
         expect(response.body.data.cost).toBe(3 + (7-1)*0.75 + 4*2 + (11-4)*0.9 + (13-11)*0.7);
+        expect(response.body.mailStatus).toEqual("not sent");
+      }
+    );
+    it("should increase the tariff for the weekend",
+      async () => {
+        const response = await post({ ...validDeliveryRequestWeekend, packageCount: 7, distance: 13 });
+        expect(response.status).toBe(200);
+        expect(response.body.data.cost).toBe(1.1*(3 + (7-1)*0.75 + 4*2 + (11-4)*0.9 + (13-11)*0.7));
         expect(response.body.mailStatus).toEqual("not sent");
       }
     );

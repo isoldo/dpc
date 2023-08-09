@@ -32,7 +32,7 @@ The email is not sent by the endpoint handler if `SENDER_MAIL` is not defined (e
 ### Extra
 
 - [x] validate phone number
-- [ ] weekend tariff
+- [x] weekend tariff
 
 ## Deliverables
 
