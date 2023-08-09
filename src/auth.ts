@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 
 export async function isAuthorized(req: express.Request): Promise<boolean> {
-  const token = req.headers.authorization;
+  const token = req.headers.authorization?.split(" ")[1];
   const secretKey = process.env.SECRET_KEY as string;
 
   if (!token) {

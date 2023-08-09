@@ -15,6 +15,70 @@ export interface DeliveryParameters {
   distanceCost: number;
 }
 
+/**
+ * @swagger
+ * /api/request-delivery:
+ *   post:
+ *     summary: Request a delivery.
+ *     description: Request a delivery with specified package count, distance, and user details.
+ *     requestBody:
+ *       description: Details for the delivery request.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               packageCount:
+ *                 type: number
+ *                 description: Number of packages for the delivery.
+ *               distance:
+ *                 type: number
+ *                 description: Distance for the delivery in kilometers.
+ *               email:
+ *                 type: string
+ *                 description: Email of the user requesting the delivery.
+ *               phone:
+ *                 type: string
+ *                 description: Phone number of the user.
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Delivery date and time.
+ *               name:
+ *                 type: string
+ *                 description: First name of the user.
+ *               lastName:
+ *                 type: string
+ *                 description: Last name of the user.
+ *             required:
+ *               - packageCount
+ *               - distance
+ *               - email
+ *               - phone
+ *               - date
+ *               - name
+ *               - lastName
+ *     responses:
+ *       200:
+ *         description: OK. Delivery requested successfully.
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 distance: 10
+ *                 packageCount: 2
+ *                 date: "2023-08-09T12:00:00Z"
+ *                 userId: "4e4464f5-ec61-4d1e-a7c5-67662e18a53f"
+ *                 cost: 20
+ *                 baseCost: 15
+ *                 additionalPackageCost: 5
+ *                 distanceCost: 5
+ *       400:
+ *         description: Bad Request. Missing or invalid request parameters.
+ *       500:
+ *         description: Internal Server Error. An error occurred while processing the request.
+ */
 export async function deliveryHandler(req: express.Request, res: express.Response) {
   if (req.method !== "POST") {
     return errorFactory(res, 405, `Method ${req.method} not supported`)
