@@ -35,6 +35,7 @@ model Delivery {
   additionalPackageCost Float
   distanceCost          Float
   date                  DateTime
+  weekendTariff         Boolean
 
   user                  User   @relation(fields: [userId], references: [id])
 }
