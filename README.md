@@ -5,6 +5,10 @@ Delivery Price Calculator
 
 ### Running
 
+### Docker
+
+Run ` docker run -d -p 3000:3000 -p 5432:5432 -e DATABASE_URL=postgres://postgres@host.docker.internal:5432/postgres <image_name>`.
+
 The app is run by calling `npm start`. A server is listening to `http://localhost:3000`.
 PostgreSQL database URL is defined in `.env` and defaults to `postgres://postgres@localhost:5432/postgres`.
 Before running the app for the first time, run `npx prisma migrate reset` to drop everything in the database and perform migrations (populate the schema).
@@ -44,4 +48,4 @@ The email is not sent by the endpoint handler if `SENDER_MAIL` is not defined (e
 
 ### Extra
 
-- [ ] Docker
+- [x] Docker
