@@ -38,7 +38,7 @@ The email is not sent by the endpoint handler if `SENDER_MAIL` is not defined (e
 
 - [x] REST API (express, Typescript)
 - [x] Database (PostgreSQL)
-- [ ] Documentation (Swagger)
+- [x] Documentation (Swagger)
 - [x] Unit tests
 - [x] Integration tests
 
