@@ -40,26 +40,32 @@ interface FixedPricesParams {
 }
 
 export async function updateFixedPrices(params: FixedPricesParams) {
-  const result = await prismaClient.$transaction( async (pc) => {
-    const activeRow = await pc.fixedPrices.findMany({ where: { active: true } });
-    const activeIds = activeRow.map( row => row.id);
-    const newRecord = await pc.fixedPrices.create({
-      data: {
-        ...params,
-        active: true
-      }
+  try {
+    const result = await prismaClient.$transaction( async (pc) => {
+      const activeRow = await pc.fixedPrices.findMany({ where: { active: true } });
+      const activeIds = activeRow.map( row => row.id);
+      const newRecord = await pc.fixedPrices.create({
+        data: {
+          ...params,
+          active: true
+        }
+      });
+      // just in case there were multiple active fixed costs records
+      await pc.fixedPrices.updateMany(
+        {
+          where: { id: { in: activeIds } },
+          data: { active: false }
+        }
+      );
+      return newRecord;
     });
-    // just in case there were multiple active fixed costs records
-    await pc.fixedPrices.updateMany(
-      {
-        where: { id: { in: activeIds } },
-        data: { active: false }
-      }
-    );
-    return newRecord;
-  });
 
-  return result;
+    return result;
+  } catch (e) {
+    const err = e as Error;
+    console.error(`>>>>>> Error: ${err.message}`);
+    return null;
+  }
 }
 
 export async function updateVariablePrices(sortedData: VariablePrices[]) {
