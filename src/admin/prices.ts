@@ -43,6 +43,28 @@ async function handlePutPrices(req: express.Request, res: express.Response, id?:
   return errorFactory(res, 400, `Unsupported type: ${id}`);
 }
 
+/**
+ * @swagger
+ * /api/admin/prices/fixed:
+ *   get:
+ *     summary: Get fixed prices for delivery.
+ *     description: Retrieve the current fixed prices for delivery.
+ *     security:
+ *       - JwtAuth: []
+ *     responses:
+ *       200:
+ *         description: OK. Fixed prices retrieved successfully.
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 base: 7
+ *                 additionalPackage: 2.5
+ *       404:
+ *         description: Not Found. Fixed prices not found.
+ *       500:
+ *         description: Internal server error. Error fetching fixed prices from the database.
+ */
 async function handleGetFixedPrices(_req: express.Request, res: express.Response) {
   try {
     const data = await fetchFixedPrices();
@@ -57,6 +79,32 @@ async function handleGetFixedPrices(_req: express.Request, res: express.Response
   }
 }
 
+/**
+ * @swagger
+ * /api/admin/prices/variable:
+ *   get:
+ *     summary: Get variable prices for delivery.
+ *     description: Retrieve the current variable prices for delivery.
+ *     security:
+ *       - JwtAuth: []
+ *     responses:
+ *       200:
+ *         description: OK. Variable prices retrieved successfully.
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 - start: 0
+ *                   end: 5
+ *                   cost: 10
+ *                 - start: 5
+ *                   end: -1
+ *                   cost: 15
+ *       404:
+ *         description: Not Found. Variable prices not found.
+ *       500:
+ *         description: Internal server error. Error fetching variable prices from the database.
+ */
 async function handleGetVariablePrices(_req: express.Request, res: express.Response) {
   try {
     const data = await fetchVariablePrices();
@@ -70,7 +118,47 @@ async function handleGetVariablePrices(_req: express.Request, res: express.Respo
     return errorFactory(res, 500, "Error fetching variable prices");
   }
 }
-
+/**
+ * @swagger
+ * /api/admin/prices/fixed:
+*   put:
+*     summary: Update fixed prices for delivery.
+*     description: Update the fixed prices for delivery.
+*     security:
+*       - JwtAuth: []
+*     requestBody:
+*       description: New fixed prices to update.
+*       required: true
+*       content:
+*         application/json:
+*           schema:
+*             type: object
+*             properties:
+*               base:
+*                 type: number
+*                 description: Base price for delivery.
+*               additionalPackage:
+*                 type: number
+*                 description: Additional package price for delivery.
+*             required:
+*               - base
+*               - additionalPackage
+*     responses:
+*       200:
+*         description: OK. Fixed prices updated successfully.
+*         content:
+*           application/json:
+*             example:
+*               data:
+*                 base: 7
+*                 additionalPackage: 2.5
+*       400:
+*         description: Bad Request. Incomplete or invalid request body.
+*       401:
+*         description: Unauthorized. Authentication token is missing or invalid.
+*       500:
+*         description: Internal Server Error. An error occurred while updating fixed prices.
+*/
 async function handlePutFixedPrices(req: express.Request, res: express.Response) {
   const { base, additionalPackage } = req.body;
   console.debug({ base, additionalPackage });
@@ -93,6 +181,56 @@ async function handlePutFixedPrices(req: express.Request, res: express.Response)
   return errorFactory(res, 500, "Error updating fixed prices");
 }
 
+/**
+ * @swagger
+ * /api/admin/prices/variable:
+ *   put:
+ *     summary: Update variable prices for delivery.
+ *     description: Update the variable prices for delivery intervals.
+ *     security:
+ *       - JwtAuth: []
+ *     requestBody:
+ *       description: New variable prices to update.
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: array
+ *             items:
+ *               type: object
+ *               properties:
+ *                 start:
+ *                   type: number
+ *                   description: Start of the interval.
+ *                 end:
+ *                   type: number
+ *                   description: End of the interval (optional, use -1 for open-ended).
+ *                 cost:
+ *                   type: number
+ *                   description: Cost for the interval.
+ *               required:
+ *                 - start
+ *                 - cost
+  *     responses:
+ *       200:
+ *         description: OK. Variable prices updated successfully.
+ *         content:
+ *           application/json:
+ *             example:
+ *               data:
+ *                 - start: 0
+ *                   end: 5
+ *                   cost: 10
+ *                 - start: 5
+ *                   end: -1
+ *                   cost: 15
+ *       400:
+ *         description: Bad Request. Incomplete or invalid request body.
+ *       401:
+ *         description: Unauthorized. Authentication token is missing or invalid.
+ *       500:
+ *         description: Internal Server Error. An error occurred while updating variable prices.
+ */
 async function handlePutVariablePrices(req: express.Request, res: express.Response) {
   const newPrices: VariablePrices[] = req.body;
 
