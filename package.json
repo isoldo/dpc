@@ -4,7 +4,7 @@
   "description": "Delivery Price Calculator",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "tsc --project ./tsconfig.build.json",
+    "build": "prisma generate && tsc --project ./tsconfig.build.json",
     "start": "yarn build && node dist/src/index.js",
     "test": "DATABASE_URL=postgres://postgres@localhost:5433/postgres prisma migrate reset && SECRET_KEY=testing DATABASE_URL=postgres://postgres@localhost:5433/postgres jest --detectOpenHandles"
   },
